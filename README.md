@@ -47,7 +47,7 @@ Specific operations:
 | **defect_amount_reorder** | Sort the rows of the following defect statistics table by the 'Defect Quantity' column, in descending order, and output the table again.<br>**<statistics_result>**<br>Only output the defect count table, and do not output any unrelated content, such as explanations.                                                                                                                                                                                                                                                                                                                                                                                                                       
 # Implementation Details of Adequacy Dimension Assessment
 
-## Details of Adequacy Evaluation Agent
+## Details of Adequacy Assessment Agent
 This agent implements an automated process for evaluating the adequacy dimension of software testing reports, based on a large language model (LLM). The evaluation is divided into several steps: functional point extraction, test case processing, coverage calculation, and final adequacy scoring. Below are the details of the algorithm's implementation:
 
 ### 1. Functional Point Extraction
@@ -93,6 +93,78 @@ Specific operations:
 | **coverage_calculate**     | There is a test requirement document with the following list of functional points, totaling {} items:<br>**<functional_points_list>**<br>There is also a list of test cases written by testers, totaling {} items:<br>**<test_case_list>**<br>Please process each test case in the following steps:<br>1. Classify the defects in the test case according to the functional points list, output the functional point that corresponds to the test case, and the name of the functional point must exactly match the name in the list. Do not create new names for functional points. Process each test case without omission.<br>2. Collect all functional points covered by each test case and output as a list, counted as covered functional points. Construct a JSON output with the covered functional points list, key as 'covered'. Wrap the JSON output using ```json``` format. |
 | **coverage_rate_score**    | In a software test, the complete list of functional points is as follows, totaling {} items:<br>**<functional_points_list>**<br>And the list of functional points covered by the test cases written by testers is as follows:<br>**<covered_functional_points_list>**<br>Please process these two functional point lists:<br>1. Calculate the total number of functional points in the complete list.<br>2. Calculate the number of functional points covered by the test cases.<br>3. Calculate the coverage rate by dividing the number of covered points by the total number of points.<br>4. Based on the coverage rate, provide three sentences of feedback to inform the developers about the coverage of the test cases, including which points are covered and which are not.<br>Please output the JSON with the coverage rate score (coverage rate * 100) under 'score', and the feedback under 'comment'. Wrap the JSON output using ```json``` format. |
 | **adequacy_statistics**    | For the following list of functional points coverage by test cases, please generate a table with 'Test Case Name', 'Adequacy Score', and 'Feedback'. Ensure that the adequacy score is calculated based on the coverage rate and that feedback is concise and informative, reflecting the adequacy of the coverage.<br>**<test_case_coverage_list>**<br>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+# Implementation Details of Textual Dimension Assessment
+
+## Details of Textual Assessment Agent
+This agent implements an automated process for evaluating the textual dimension of software testing reports, based on a set of predefined scoring rules. The evaluation is divided into several steps: test case extraction, score calculation, and final textual scoring. Below are the details of the algorithm's implementation:
+
+### 1. Test Case Extraction
+First, the program loads test case data from an Excel file, which includes test case descriptions and other relevant fields (such as test case name, priority, expected results, etc.).
+
+**Specific operations:**
+- The program extracts test case data from an Excel file, ensuring the correct columns (i.e., "testcase id", "testcase name'", "priority", "testcase description", etc.) are present.
+- The data is converted into a list of dictionaries for further processing.
+
+### 2. Textual Scoring Rule Loading
+The program reads the textual scoring rules from a text file. These rules define how each aspect of the test case text should be evaluated (e.g., format, completeness, clarity).
+
+**Specific operations:**
+- Read the textual scoring rules from a file (the content of this file has been shown in 'Rule of Textual Dimension Assessment').
+- Parse the rules to apply them to the test case descriptions.
+
+### 3. Score Calculation
+The program processes each test case by applying the textual scoring rules. For each test case, the program assigns scores for different criteria (e.g., RM1, RM2, RR1, etc.) based on the rules.
+
+**Specific operations:**
+- For each test case, the program uses predefined rules to evaluate different textual aspects of the test case.
+- The program calculates scores for each rule and aggregates them into a total score.
+
+### 4. Total Score Calculation
+The program calculates the total score for a test case by summing the individual scores for each rule (e.g., RM1, RM2, etc.). It then generates a detailed feedback comment based on the individual scores.
+
+**Specific operations:**
+- Calculate the total score by summing the individual scores for each rule.
+- Generate a feedback comment explaining the score for each rule and overall performance.
+
+### 5. Average Score Calculation
+The program can calculate the average score for a set of test cases. This helps in understanding the overall quality of the test cases in terms of textual completeness and correctness.
+
+**Specific operations:**
+- Calculate the average score for each rule across multiple test cases.
+- Output the average score for each rule, providing insights into the overall textual quality of the test cases.
+
+### Execution Flow
+1. **Set Test Case Data Path**: Define the path to the test case Excel file.
+2. **Read Test Case Data**: Extract test case data from the Excel file.
+3. **Load Scoring Rules**: Load the textual scoring rules from the file.
+4. **Calculate Individual Scores**: Apply the scoring rules to each test case.
+5. **Calculate Total Score**: Aggregate the individual scores into a total score for each test case.
+6. **Calculate Average Score**: Compute the average score across all test cases.
+7. **Store Results**: Save the results (scores and comments) to a CSV file for further analysis.
+
+### Prompts
+
+| Prompt Name               | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **textual_scoring_rules**  | Below are the scoring criteria for writing test cases. This standard requires each aspect of a test case to be evaluated for compliance. The compliance scoring criteria cover RM, RR, and RA, with each category specifying the scoring rules for each point. <br>**<scoring_criteria_details>**<br>Please use the above scoring criteria to evaluate the compliance of this test case. The score results should be output in JSON format, where the `criteria` field represents the point number, `score` is the score, and `reason` is the justification for the given score. An example of the JSON format is as follows: <br>[<br>{"criteria":"RM1",<br>  "reason":"<explanation_of_reason>",<br>  "score":"3"},<br>{"criteria":"RM2",<br>  "reason":"<explanation_of_reason>",<br>  "score":"4"},<br>…<br>] |
+| **textual_testcase_score** | Below is a software test case. Please score it according to the above criteria and output the result in JSON format. Do not output any unrelated content. <br>**<test_case_details>** |
+
+## Rule of Textual Dimension Assessment
+| **Criteria**            | **Rule**                                                                                           | **Scoring**                                                                                                                                             |
+|-------------------------|----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **RM1 (Size)**           | The length of the test case description should be between 10 and 100 words.                         | - 3 points: Fully meets the length requirement. <br> - Points are deducted based on the proportion of words over or under the specified range.           |
+| **RM2 (Readability)**    | The description should be concise, smooth, and easy to understand.                                  | - 2 points: Fully meets the readability requirement. <br> - Points are deducted for logical errors or unclear sentence structure.                        |
+| **RM3 (Punctuation)**    | Correct usage of punctuation marks according to grammar standards.                                 | - 3 points: Fully meets the punctuation requirement. <br> - Deduct 0.25 points for each punctuation error, down to 0 points.                             |
+| **RR1 (Step-by-Step Clarity)**  | The test steps should be numbered logically, each step clear and concise.                        | - 4 points: Fully meets the requirement. <br> - Deduct 1 point for missing steps or disorganized sequence. <br> - 2 points if steps are not numbered.     |
+| **RR1.1 (Step Numbering or Bullet Usage)** | Use consistent numbering or bullet points (e.g., numbered list or '-' bullets).          | - 1 point: Fully meets the requirement. <br> - Deduct 0.25 points for each inconsistency or error in bullet/numbering usage.                              |
+| **RR2 (Environment)**    | Complete information about the test environment (e.g., hardware specs, OS version, emulator, etc.). | - 3 points: Fully meets the requirement. <br> - Deduct 0.5 points for each missing or incomplete detail.                                                 |
+| **RR3 (Preconditions)**  | All preconditions that need to be met before running the test should be listed clearly.             | - 2 points: Fully meets the requirement. <br> - Deduct 0.5 points for missing or unclear preconditions. <br> - 0 points if key preconditions are missing. |
+| **RR4 (Expected Results)** | The expected results should be clearly specified.                                                | - 2 points: Fully meets the requirement. <br> - Deduct 1-2 points for unclear or missing expected results.                                              |
+| **RR5 (Additional Information)** | The additional information should be complete, including test case designer, priority, etc.   | - 2 points: Fully meets the requirement. <br> - Deduct points proportionally for each missing key piece of information.                                  |
+| **RA1 (Interface Elements)** | The description of interface elements (e.g., buttons, links, input fields) should be accurate.   | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each unclear or missing description of an element.                                      |
+| **RA2 (User Actions)**   | The interaction process between the user and the interface elements should be described in detail.  | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each missing or inaccurate description of user actions.                               |
+
+
 
 
                                                                                                                                                                                                                                                                                                                                                                            
