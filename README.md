@@ -164,6 +164,92 @@ The program can calculate the average score for a set of test cases. This helps 
 | **RA1 (Interface Elements)** | The description of interface elements (e.g., buttons, links, input fields) should be accurate.   | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each unclear or missing description of an element.                                      |
 | **RA2 (User Actions)**   | The interaction process between the user and the interface elements should be described in detail.  | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each missing or inaccurate description of user actions.                               |
 
+## Implementation Details of Competitive Dimension Assessment
+
+### Details of Competitive Assessment Agent
+This agent implements an automated process for evaluating the competitive dimension of software testing reports using a large language model (LLM). The evaluation process includes defect classification, scoring, and generating feedback based on predefined defect categories. Below are the details of the algorithm's implementation:
+
+### 1. Defect Classification and Scoring Table Creation
+First, the agent loads the defect category statistics and scoring rules, and generates a scoring table for defects. This involves categorizing defects based on their descriptions, according to predefined rules. The resulting scoring table is then used to evaluate the defects in testing reports.
+
+Specific operations:
+- Read the defect category statistics from a text file.
+- Load the defect scoring rules from a separate file.
+- Generate a defect scoring table using the category statistics and rules.
+
+### 2. Defect Report Evaluation
+The agent processes defect reports from Excel files. Each defect description is matched against the scoring table, categorized, and assigned a score. Finally, the scores are summed up and feedback is provided on the coverage of defect categories.
+
+Specific operations:
+- Read the defect descriptions from an Excel file.
+- Match each defect to its corresponding category from the scoring table.
+- Calculate the total score based on the categories and their respective scores.
+- Provide feedback on which defect categories are covered and which are not, including suggestions for improvements.
+
+### 3. Score Calculation and Feedback Generation
+The score for each report is calculated by summing the individual defect category scores. The feedback provides insights into the coverage of defect categories and gives recommendations for test case improvements.
+
+Specific operations:
+- Sum up the scores of categorized defects.
+- Generate feedback based on the coverage of defect categories.
+- Output the score and feedback in JSON format.
+
+### 4. Reporting and Saving Results
+Finally, the agent processes multiple defect reports from a folder, evaluates them, and saves the results in a CSV file. The CSV includes the report filename, score, and feedback.
+
+Specific operations:
+- Read defect reports from a folder.
+- Evaluate each report using the scoring table and feedback mechanism.
+- Save the results (filename, score, and feedback) in a CSV file for further analysis.
+
+### Execution Flow
+1. **Set Defect Cluster Table Path**: Define the path to the defect category statistics file.
+2. **Generate Defect Scoring Table**: Create a scoring table using defect category statistics and scoring rules.
+3. **Evaluate Individual Report**: For each report, extract defects, categorize them, and calculate scores.
+4. **Generate Feedback**: Provide feedback on defect category coverage and improvement suggestions.
+5. **Store Results**: Save the results in a CSV file for further analysis.
+
+### Prompts
+
+| Prompt Name               | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **scoring_table_create**   | Please generate a defect scoring table based on the following defect category statistics table and scoring rules.<br>**<defect_category_statistics>**<br>Scoring table generation rules:<br>**<scoring_rules>**<br>Provide the complete calculation process for each step used in the generation of the scoring table, and finally output the result in table form. |
+| **table_extract**          | Please extract only the table generated from Step 4, without any additional unrelated content or explanations.<br>**<generated_scoring_table>** |
+| **score_report**           | Below is a defect scoring table that defines defect categories and their respective scores:<br>**<defect_scoring_table>**<br>Now, here is a list of defect descriptions in the report:<br>**<defect_descriptions>**<br>Follow these steps to process the defects in the report:<br>1. Classify each defect according to the scoring table.<br>2. Find the score for each defect category and output the score. Unclassified defects do not receive any score.<br>3. Sum the scores for all defects and output the total score.<br>4. Provide feedback on the coverage of defect categories and suggest improvements.<br>Output the results in JSON format with `score` and `comment` as the keys. |
+| **competitive_statistics** | For the following list of defects evaluated in the report, please generate a table with 'Report Name', 'Score', and 'Feedback'. The score should be based on the defect category coverage and the feedback should be concise and informative.<br>**<defect_report_coverage_list>** |
+
+### Steps for Creating a Scoring Table
+
+#### Step 1: Define Preliminary Scores
+Based on the defect statistics table, calculate preliminary scores for each defect category. The base score is set at 100 points. The formula for calculating preliminary scores is:
+
+$$\text{Preliminary Score} = \frac{\text{Maximum Base Score}}{\text{Defect Count} + 1}$$
+
+For example, if a defect is reported 5 times and the maximum base score is set at 100 points, then the preliminary score is:
+
+$$\text{Preliminary Score} = \frac{100}{5 + 1} \approx 16.67$$
+
+
+#### Step 2: Calculate Total Score
+Add up the preliminary scores of all defect categories to get the total score. The formula for calculating the total score is:
+
+$$\text{Total Score} = \sum \text{Preliminary Scores of All Defects}$$
+
+#### Step 3: Calculate Normalized Scores
+For each defect category, divide the preliminary score by the total score and then multiply by 100 to get the normalized score. You need to iterate through each defect category to calculate and output the calculation process and result for the normalized score. The formula for calculating normalized scores is:
+
+$$\text{Normalized Score} = \left( \frac{\text{Preliminary Score}}{\text{Total Score}} \right) \times 100$$
+
+For example, if a defect's preliminary score is 16.67 and the total score is 346, then the normalized score is:
+
+$$\text{Normalized Score} = \left( \frac{16.67}{346} \right) \times 100 \approx 4.82$$
+
+#### Step 4: Generate the Scoring Table
+Finally, create a table listing all defect categories and fill in the normalized scores for each category. The table header should have two fields: "Defect Name", "Defect Description", and "Normalized Score". The table should be clear, easy to read, and understandable. The table is created only in Step 4; other steps do not require the output of a table.
+
+| Defect Name | Defect Description | Normalized Score |
+|-------------|--------------------|------------------|
+| ...         | ...                | ...              |
 
 
 
