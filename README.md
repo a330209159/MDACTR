@@ -253,4 +253,26 @@ Finally, create a table listing all defect categories and fill in the normalized
 
 
 
+## Model Selection
+
+### 1. Model Selection
+After testing various models and considering factors such as cost, scoring accuracy, and token length requirements for diverse scenarios, we have chosen **GPT-3.5-turbo** and **Kimi's moonshot-v1-8k** as the cornerstone models for our approach. **GPT-3.5-turbo** is renowned for its high scoring accuracy and adeptness at handling longer texts, while **Kimi's model** stands out in qualitative assessments, particularly for tasks that demand an extended understanding of context.
+
+### 2. Sampling Parameters
+To maintain consistency and fairness in the model's scoring while preserving a degree of subjectivity, we have set the temperature parameter to **0.1**. This low value ensures that the model's outputs are more consistent, thereby reducing bias, and yet it still allows for a certain level of diversity in the outcomes.
+
+### Model Comparison
+
+| Feature               | GPT-3.5-turbo                           | Kimi's moonshot-v1-8k                       |
+|-----------------------|------------------------------------------|--------------------------------------------|
+| **Core Focus**         | High scoring accuracy and handling long texts | Qualitative assessments with extended context understanding |
+| **Strengths**          | Excellent for large-scale tasks, adaptable for a variety of scenarios | Specializes in tasks requiring deep context understanding |
+| **Performance**        | Efficient with large volumes of data and texts | Strong in qualitative evaluations, especially for nuanced analysis |
+| **Temperature Setting**| 0.1 for consistency with slight diversity | 0.1 for reduced bias, allowing for varied yet consistent outputs |
+| **Best Use Cases**     | Scoring, content generation, and tasks requiring long-form text handling | Assessments requiring deeper contextual comprehension and nuanced evaluation |
+| **Customization**      | Highly flexible, capable of handling different contexts with minimal loss in performance | Tailored for complex, subjective, and context-heavy evaluations |
+| **Cost Efficiency**    | Well-suited for larger volumes, optimized for various cost-effective applications | Potentially more resource-intensive and slower in processing, it excels in specialized areas |
+
+
+
                                                                                                                                                                                                                                                                                                                                                                            
