@@ -110,8 +110,8 @@ def save_list_to_file(list_items, file_name):
 
 
 def evaluation(i):
-    path_testcase_folder = '../data/saber/report_testcase'
-    csv_file_path = f'report_textual_scores_{i}_time.csv'
+    path_testcase_folder = '../data/app/neteasemoney/report_testcase'
+    csv_file_path = f'report_textual_scores.csv'
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
         # 创建CSV写入器
         csv_writer = csv.writer(csv_file)
@@ -157,28 +157,5 @@ print("处理完成，结果已保存到CSV文件。")
 
 if __name__ == '__main__':
 
-    evaluation("saber")
-    # for i in range(15, 16):
-    #     testcase_textual_score_list = []
-    #     file_path = f"../data/reports_testcase/{i}.xlsx"
-    #     testcase_list = read_excel_to_dict(file_path)
-    #     prompt_criteria = prompts["score_criteria"].format(get_textual_scoring_rule())
-    #     total_score = 0
-    #     random_testcase_list = random.sample(testcase_list, min(len(testcase_list), 10))
-    #     print(f"正在评估{file_path},列表数量{len(random_testcase_list)}")
-    #     for item in random_testcase_list:
-    #         prompt_score = prompt_criteria + prompts["score_testcase"].format(item)
-    #         # 记录发送的提示词
-    #         messages["textual_score"] = prompt_score
-    #         # 将计算指令发送到大模型,并记录结果
-    #         results["coverage_calculate_result"] = kimi.chat_with_kimi(role, prompt_score, model='kimi')
-    #         print(results["coverage_calculate_result"])
-    #         score, comment = calculate_total_score(results["coverage_calculate_result"])
-    #         print(score)
-    #         # time.sleep(25)
-    #         total_score += score
-    #         testcase_textual_score_list.append({"score": score, "comment": comment})
-        # final_score = total_score / len(random_testcase_list)
-        # final_score = format(final_score, '.0f')
-        # save_list_to_file(testcase_textual_score_list,
-        #                   f"../data/textual_results/textual_scoring_result_{i}_{str(final_score)}.txt")
+    evaluation("neteasemoney")
+

@@ -116,7 +116,7 @@ def extract_json_from_content(content):
 
 def eval_reports_competitive(folder_path):
     # 文件夹路径
-    csv_file_path = 'report_competitive_scores_wangyi.csv'
+    csv_file_path = 'report_competitive_scores.csv'
     # 创建或覆盖CSV文件
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
         # 创建CSV写入器

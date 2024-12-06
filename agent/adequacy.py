@@ -168,7 +168,7 @@ def eval_adequacy_one(file_path):
 
 def eval_reports_adequacy(folder_path):
     # 文件夹路径
-    csv_file_path = 'report_adequacy_scores_wangyi2.csv'
+    csv_file_path = 'report_adequacy_scores.csv'
     # 创建或覆盖CSV文件
     with open(csv_file_path, mode='w', newline='', encoding='utf-8') as csv_file:
         # 创建CSV写入器
