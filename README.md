@@ -274,5 +274,67 @@ To maintain consistency and fairness in the model's scoring while preserving a d
 | **Cost Efficiency**    | Well-suited for larger volumes, optimized for various cost-effective applications | Potentially more resource-intensive and slower in processing, it excels in specialized areas |
 
 
+## Project Reproduction Steps
 
+### Step 1: Download the Project  
+Click the **Download Repository** button in the top-right corner of the page to download the project.
+
+### Step 2: Extract the Project  
+Unzip the downloaded file **MDACTR.zip**.
+
+### Step 3: Install Dependencies  
+Use `pip install` to install the following dependencies:
+
+```text
+annotated-types==0.7.0
+anyio==4.7.0
+certifi==2024.8.30
+distro==1.9.0
+et-xmlfile==1.1.0
+exceptiongroup==1.2.2
+h11==0.14.0
+httpcore==1.0.7
+httpx==0.28.0
+idna==3.10
+jiter==0.8.0
+numpy==2.1.2
+openai==1.57.0
+openpyxl==3.1.5
+pandas==2.2.3
+pydantic==2.10.3
+pydantic_core==2.27.1
+python-dateutil==2.9.0.post0
+pytz==2024.2
+six==1.16.0
+sniffio==1.3.1
+tqdm==4.67.1
+typing_extensions==4.12.2
+tzdata==2024.2
+```
+### Step 4: Configure API Key  
+Open the **kimi_llm.py** file and replace the `api_key` and `base_url` with your own OpenAI API credentials. Save the changes.
+
+### Step 5: Move the File  
+Move the **kimi_llm.py** file to the **agent** folder.
+
+### Step 6: Run Adequacy Assessment  
+Navigate to the **agent** folder in the terminal and execute the adequacy dimension evaluation using the following command:  
+```bash
+python main.py adequacy
+```
+### Step 7: Run Competitive Assessment
+Run the competitiveness dimension evaluation using the following command:
+```bash
+python main.py competitive
+```
+### Step 8: Run Textual Assessment
+Run the textual evaluation using the following command:
+```bash
+python main.py textual
+```
+### Step 9: View Assessment Results  
+Find the following files in the **agent** folder to view the evaluation results:  
+- **report_adequacy_scores.csv**: Contains the results of the adequacy assessment.  
+- **report_competitive_scores.csv**: Contains the results of the competitiveness assessment.  
+- **report_textual_scores.csv** : Contains the results of the textual assessment. 
                                                                                                                                                                                                                                                                                                                                                                            
