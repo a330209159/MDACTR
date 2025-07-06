@@ -11,12 +11,12 @@ KIMI_BASE_URL = "https://api.moonshot.cn/v1"
 
 # OpenAI API配置
 OPENAI_API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-OPENAI_BASE_URL = "https://api.moonshot.cn/v1"  # 使用转发GPT的URL
+OPENAI_BASE_URL = "https://api.ohmygpt.com/v1"  # 使用转发GPT的URL
 
 # 模型配置
 DEEPSEEK_MODEL = "deepseek-chat"
 KIMI_MODEL = "moonshot-v1-32k"
-GPT4O_MODEL = "moonshot-v1-32k"
+GPT4O_MODEL = "gpt-4o-2024-05-13"
 
 # 通用参数配置
 TEMPERATURE = 0.1
