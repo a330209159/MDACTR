@@ -1,340 +1,907 @@
-# MDACTR
-This is a repository for Data Availability of Our Paper:
-Multi-dimensional Assessment of CrowdSourced Testing Reports via LLMs
-
-# Framework
-![Framework of Our Apporach](https://raw.githubusercontent.com/a330209159/MDACTR/main/framework.png)
-# Implementation Details of Proprocessing
-## Details of Defect Classification Agent
-This agent implements an automated defect clustering and statistical analysis process based on a large model, which is divided into three stages: defect clustering, defect statistics, and defect statistics sorting. Below are the details of the algorithm's implementation:
-
-### 1. Defect Clustering
-First, the program extracts all the defect descriptions from a specified Excel file and passes these defect descriptions along with the functional points list to the large model, asking the model to cluster the defects according to the functional points. The clustering details are as follows:
-- Each defect is categorized based on its relevance to the functional points.
-- The clustering result includes two fields: "Defect Name" and "Defect Brief Description". The "Defect Name" represents the category name after clustering (e.g., "xx Issue" or "xx Functionality Anomaly"), while the "Defect Brief Description" summarizes the main issues in that category.
-
-Specific operations:
-- Read defect descriptions from an Excel file, remove line breaks, and construct a complete defect list.
-- Read the functional points list from a text file, which serves as the basis for clustering.
-- The large model clusters the defects based on the functional points list.
-
-### 2. Defect Statistics
-After clustering is complete, the program counts the number of defects in each category. By matching the clustering result with the original defect descriptions, a statistical table containing "Defect Name", "Defect Description", and "Defect Count" is generated.
-
-Specific operations:
-- Generate a defect count for each defect category based on the clustering result and original defect descriptions.
-- Output the result as a table with headers: "Defect Name", "Defect Description", and "Defect Count".
-
-### 3. Defect Statistics Sorting
-Next, the program sorts the statistical table based on defect count, rearranging the rows in descending order of defect count.
-
-Specific operations:
-- Sort the defect statistics table by the "Defect Count" column in descending order.
-- Output the sorted defect statistics table.
-
-### Execution Flow
-1. **Get Defect List**: Extract defect descriptions from the Excel file.
-2. **Get Functional Points List**: Read functional points from the text file.
-3. **Cluster Defects**: Use the large model to cluster defects based on the functional points.
-4. **Count Defects**: Calculate the defect count for each category based on the clustering result.
-5. **Sort Defect Statistics**: Sort the defect statistics table by defect count.
-
-### Prompts
-| Prompt Name              | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **cluster_execute**       | Please cluster the defects in the software testing reports according to the granularity of the functional points list. The defects will be provided as a list, where each line represents a defect description:<br>**<defects_list>**<br>The functional points list is as follows:<br>**<functional_points_list>**<br>Please cluster the defects based on the functional points list, and output a table with two main fields: 'Defect Name' and 'Defect Brief Description'. 'Defect Name' should represent the clustered category and be described in the format of 'xx problem' or 'xx functionality abnormality', while 'Defect Description' should briefly summarize the types of issues included in this clustered category. Do not output the full defect descriptions that are included in this cluster. Ensure that each defect is accurately clustered into the corresponding functional point and defect type, and keep the clustering granularity as detailed as possible for each functional point. Avoid having a 'miscellaneous' category, and clustering can have single defects; only include the issues reflected in the defect list, do not invent any new defects. Only output the table with defect categories and their descriptions, and do not output any unrelated content. |
-| **defect_statistics**     | Based on the following table, count the number of defects for each defect category, and output the results as a table with headers 'Defect Name', 'Defect Description', and 'Defect Quantity'. Ensure that all defects in the defect list are counted, and the quantity is correct.<br>**<clustering_result>**<br>The defect list is as follows:<br>**<defects_list>**<br>Only output the defect count table, and do not output any unrelated content, such as explanations.                                                                                                                                                                                                 |
-| **defect_amount_reorder** | Sort the rows of the following defect statistics table by the 'Defect Quantity' column, in descending order, and output the table again.<br>**<statistics_result>**<br>Only output the defect count table, and do not output any unrelated content, such as explanations.                                                                                                                                                                                                                                                                                                                                                                                                                       
-# Implementation Details of Adequacy Dimension Assessment
-
-## Details of Adequacy Assessment Agent
-This agent implements an automated process for evaluating the adequacy dimension of software testing reports, based on a large language model (LLM). The evaluation is divided into several steps: functional point extraction, test case processing, coverage calculation, and final adequacy scoring. Below are the details of the algorithm's implementation:
-
-### 1. Functional Point Extraction
-First, the program loads a list of functional points from a specified text file. The functional points represent the different components or features of the software that need to be tested.
-
-Specific operations:
-- The functional points list is read from a text file, with each functional point listed on a new line.
-
-### 2. Test Case Processing
-The program then extracts the test cases from an Excel file, which includes the test case name and its description. The test cases are then processed to match them against the functional points.
-
-Specific operations:
-- Read test case descriptions from an Excel file, ensuring the correct columns (i.e., "testcase name" and "testcase description") are present.
-- Construct a list of formatted test cases for further processing.
-
-### 3. Coverage Calculation
-The program then calculates which functional points are covered by the test cases. For each test case, the program uses the LLM to classify it according to the relevant functional points.
-
-Specific operations:
-- For each test case, the LLM is prompted to match the test case with the corresponding functional points.
-- The output is a list of functional points that the test case covers.
-
-### 4. Adequacy Scoring
-Finally, the program calculates the adequacy score based on the coverage of functional points. The adequacy score is computed as the ratio of covered functional points to total functional points, multiplied by 100. The program then generates a comment based on the coverage rate.
-
-Specific operations:
-- Calculate the coverage rate (i.e., the ratio of covered functional points to total functional points).
-- Generate a comment that summarizes the coverage situation.
-- Output the adequacy score and the comment as a JSON object.
-
-### Execution Flow
-1. **Set Functional Points Path**: Define the path to the functional points file.
-2. **Read Test Case Data**: Extract test case names and descriptions from the Excel file.
-3. **Match Test Cases to Functional Points**: Use the LLM to classify test cases by functional points.
-4. **Calculate Coverage**: Determine the covered functional points for each test case.
-5. **Calculate Adequacy Score**: Compute the adequacy score and generate a feedback comment.
-6. **Store Results**: Save the results (score and comment) to a CSV file for further analysis.
-
-### Prompts
-
-| Prompt Name               | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **coverage_calculate**     | There is a test requirement document with the following list of functional points, totaling {} items:<br>**<functional_points_list>**<br>There is also a list of test cases written by testers, totaling {} items:<br>**<test_case_list>**<br>Please process each test case in the following steps:<br>1. Classify the defects in the test case according to the functional points list, output the functional point that corresponds to the test case, and the name of the functional point must exactly match the name in the list. Do not create new names for functional points. Process each test case without omission.<br>2. Collect all functional points covered by each test case and output as a list, counted as covered functional points. Construct a JSON output with the covered functional points list, key as 'covered'. Wrap the JSON output using ```json``` format. |
-| **coverage_rate_score**    | In a software test, the complete list of functional points is as follows, totaling {} items:<br>**<functional_points_list>**<br>And the list of functional points covered by the test cases written by testers is as follows:<br>**<covered_functional_points_list>**<br>Please process these two functional point lists:<br>1. Calculate the total number of functional points in the complete list.<br>2. Calculate the number of functional points covered by the test cases.<br>3. Calculate the coverage rate by dividing the number of covered points by the total number of points.<br>4. Based on the coverage rate, provide three sentences of feedback to inform the developers about the coverage of the test cases, including which points are covered and which are not.<br>Please output the JSON with the coverage rate score (coverage rate * 100) under 'score', and the feedback under 'comment'. Wrap the JSON output using ```json``` format. |
-| **adequacy_statistics**    | For the following list of functional points coverage by test cases, please generate a table with 'Test Case Name', 'Adequacy Score', and 'Feedback'. Ensure that the adequacy score is calculated based on the coverage rate and that feedback is concise and informative, reflecting the adequacy of the coverage.<br>**<test_case_coverage_list>**<br>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-# Implementation Details of Textual Dimension Assessment
-
-## Details of Textual Assessment Agent
-This agent implements an automated process for evaluating the textual dimension of software testing reports, based on a set of predefined scoring rules. The evaluation is divided into several steps: test case extraction, score calculation, and final textual scoring. Below are the details of the algorithm's implementation:
-
-### 1. Test Case Extraction
-First, the program loads test case data from an Excel file, which includes test case descriptions and other relevant fields (such as test case name, priority, expected results, etc.).
-
-**Specific operations:**
-- The program extracts test case data from an Excel file, ensuring the correct columns (i.e., "testcase id", "testcase name'", "priority", "testcase description", etc.) are present.
-- The data is converted into a list of dictionaries for further processing.
-
-### 2. Textual Scoring Rule Loading
-The program reads the textual scoring rules from a text file. These rules define how each aspect of the test case text should be evaluated (e.g., format, completeness, clarity).
-
-**Specific operations:**
-- Read the textual scoring rules from a file (the content of this file has been shown in 'Rule of Textual Dimension Assessment').
-- Parse the rules to apply them to the test case descriptions.
-
-### 3. Score Calculation
-The program processes each test case by applying the textual scoring rules. For each test case, the program assigns scores for different criteria (e.g., RM1, RM2, RR1, etc.) based on the rules.
-
-**Specific operations:**
-- For each test case, the program uses predefined rules to evaluate different textual aspects of the test case.
-- The program calculates scores for each rule and aggregates them into a total score.
-
-### 4. Total Score Calculation
-The program calculates the total score for a test case by summing the individual scores for each rule (e.g., RM1, RM2, etc.). It then generates a detailed feedback comment based on the individual scores.
-
-**Specific operations:**
-- Calculate the total score by summing the individual scores for each rule.
-- Generate a feedback comment explaining the score for each rule and overall performance.
-
-### 5. Average Score Calculation
-The program can calculate the average score for a set of test cases. This helps in understanding the overall quality of the test cases in terms of textual completeness and correctness.
-
-**Specific operations:**
-- Calculate the average score for each rule across multiple test cases.
-- Output the average score for each rule, providing insights into the overall textual quality of the test cases.
-
-### Execution Flow
-1. **Set Test Case Data Path**: Define the path to the test case Excel file.
-2. **Read Test Case Data**: Extract test case data from the Excel file.
-3. **Load Scoring Rules**: Load the textual scoring rules from the file.
-4. **Calculate Individual Scores**: Apply the scoring rules to each test case.
-5. **Calculate Total Score**: Aggregate the individual scores into a total score for each test case.
-6. **Calculate Average Score**: Compute the average score across all test cases.
-7. **Store Results**: Save the results (scores and comments) to a CSV file for further analysis.
+# Multi-dimensional Assessment of CrowdSourced Testing Reports via LLMs
 
-### Prompts
+## Overview
 
-| Prompt Name               | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **textual_scoring_rules**  | Below are the scoring criteria for writing test cases. This standard requires each aspect of a test case to be evaluated for compliance. The compliance scoring criteria cover RM, RR, and RA, with each category specifying the scoring rules for each point. <br>**<scoring_criteria_details>**<br>Please use the above scoring criteria to evaluate the compliance of this test case. The score results should be output in JSON format, where the `criteria` field represents the point number, `score` is the score, and `reason` is the justification for the given score. An example of the JSON format is as follows: <br>[<br>{"criteria":"RM1",<br>  "reason":"<explanation_of_reason>",<br>  "score":"3"},<br>{"criteria":"RM2",<br>  "reason":"<explanation_of_reason>",<br>  "score":"4"},<br>…<br>] |
-| **textual_testcase_score** | Below is a software test case. Please score it according to the above criteria and output the result in JSON format. Do not output any unrelated content. <br>**<test_case_details>** |
+This repository contains the implementation of **Multi-dimensional Assessment of CrowdSourced Testing Reports via LLMs**, a comprehensive framework for automatically assessing the quality of crowdsourced testing reports using Large Language Models. The system employs three specialized AI agents to assess crowdsourced testing reports across three critical dimensions: **Textual Dimension**, **Adequacy Dimension**, and **Competitive Dimension**, which respectively focus on the basic text quality of test cases and defects, the coverage of functional points by test cases, and the rarity and novelty of defect discoveries.
 
-## Rule of Textual Dimension Assessment
-| **Criteria**            | **Rule**                                                                                           | **Scoring**                                                                                                                                             |
-|-------------------------|----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **RM1 (Size)**           | The length of the test case description should be between 10 and 100 words.                         | - 3 points: Fully meets the length requirement. <br> - Points are deducted based on the proportion of words over or under the specified range.           |
-| **RM2 (Readability)**    | The description should be concise, smooth, and easy to understand.                                  | - 2 points: Fully meets the readability requirement. <br> - Points are deducted for logical errors or unclear sentence structure.                        |
-| **RM3 (Punctuation)**    | Correct usage of punctuation marks according to grammar standards.                                 | - 3 points: Fully meets the punctuation requirement. <br> - Deduct 0.25 points for each punctuation error, down to 0 points.                             |
-| **RR1 (Step-by-Step Clarity)**  | The test steps should be numbered logically, each step clear and concise.                        | - 4 points: Fully meets the requirement. <br> - Deduct 1 point for missing steps or disorganized sequence. <br> - 2 points if steps are not numbered.     |
-| **RR1.1 (Step Numbering or Bullet Usage)** | Use consistent numbering or bullet points (e.g., numbered list or '-' bullets).          | - 1 point: Fully meets the requirement. <br> - Deduct 0.25 points for each inconsistency or error in bullet/numbering usage.                              |
-| **RR2 (Environment)**    | Complete information about the test environment (e.g., hardware specs, OS version, emulator, etc.). | - 3 points: Fully meets the requirement. <br> - Deduct 0.5 points for each missing or incomplete detail.                                                 |
-| **RR3 (Preconditions)**  | All preconditions that need to be met before running the test should be listed clearly.             | - 2 points: Fully meets the requirement. <br> - Deduct 0.5 points for missing or unclear preconditions. <br> - 0 points if key preconditions are missing. |
-| **RR4 (Expected Results)** | The expected results should be clearly specified.                                                | - 2 points: Fully meets the requirement. <br> - Deduct 1-2 points for unclear or missing expected results.                                              |
-| **RR5 (Additional Information)** | The additional information should be complete, including test case designer, priority, etc.   | - 2 points: Fully meets the requirement. <br> - Deduct points proportionally for each missing key piece of information.                                  |
-| **RA1 (Interface Elements)** | The description of interface elements (e.g., buttons, links, input fields) should be accurate.   | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each unclear or missing description of an element.                                      |
-| **RA2 (User Actions)**   | The interaction process between the user and the interface elements should be described in detail.  | - 5 points: Fully meets the requirement. <br> - Deduct 1 point for each missing or inaccurate description of user actions.                               |
+This implementation addresses the critical challenge of efficiently reviewing large volumes of crowdsourced testing reports with varying quality submitted by diverse crowd workers. By leveraging the LLM-as-a-Judge paradigm, our framework provides objective, scalable, and consistent assessment while maintaining high accuracy comparable to human expert assessments. The multi-dimensional approach ensures comprehensive assessment from individual report quality, functional requirement coverage, and competitive defect discovery value perspectives.
 
-## Implementation Details of Competitive Dimension Assessment
+### Framework Architecture Diagram
 
-### Details of Competitive Assessment Agent
-This agent implements an automated process for evaluating the competitive dimension of software testing reports using a large language model (LLM). The evaluation process includes defect classification, scoring, and generating feedback based on predefined defect categories. Below are the details of the algorithm's implementation:
+![Framework Overview](framework.png)
+*Figure: Overview of the multi-dimensional assessment framework consisting of three specialized LLM-based agents for crowdsourced testing report assessment.*
 
-### 1. Defect Classification and Scoring Table Creation
-First, the agent loads the defect category statistics and scoring rules, and generates a scoring table for defects. This involves categorizing defects based on their descriptions, according to predefined rules. The resulting scoring table is then used to evaluate the defects in testing reports.
 
-Specific operations:
-- Read the defect category statistics from a text file.
-- Load the defect scoring rules from a separate file.
-- Generate a defect scoring table using the category statistics and rules.
 
-### 2. Defect Report Evaluation
-The agent processes defect reports from Excel files. Each defect description is matched against the scoring table, categorized, and assigned a score. Finally, the scores are summed up and feedback is provided on the coverage of defect categories.
+## Framework Architecture and Code Structure
 
-Specific operations:
-- Read the defect descriptions from an Excel file.
-- Match each defect to its corresponding category from the scoring table.
-- Calculate the total score based on the categories and their respective scores.
-- Provide feedback on which defect categories are covered and which are not, including suggestions for improvements.
+### Three-Dimensional Assessment Dimension
 
-### 3. Score Calculation and Feedback Generation
-The score for each report is calculated by summing the individual defect category scores. The feedback provides insights into the coverage of defect categories and gives recommendations for test case improvements.
+The framework assesses test reports across three dimensions:
 
-Specific operations:
-- Sum up the scores of categorized defects.
-- Generate feedback based on the coverage of defect categories.
-- Output the score and feedback in JSON format.
+1. **Textual Quality Assessment**: Assesses report quality using morphological, relational, and analytical metrics.
+1. **Adequacy Assessment**: Assesses requirement coverage using hierarchical requirement tree analysis.
+3. **Competitive Assessment**: Assesses tester performance through defect clustering and uniqueness analysis.
 
-### 4. Reporting and Saving Results
-Finally, the agent processes multiple defect reports from a folder, evaluates them, and saves the results in a CSV file. The CSV includes the report filename, score, and feedback.
+```
+code/
+├── main.py                 # Main orchestrator for all three agents
+├── adequacy_agent.py       # Adequacy assessment implementation
+├── textual_agent.py        # Textual quality assessment implementation
+├── competitive_agent.py    # Competitive assessment implementation
+├── config.py              # Configuration file for API keys and parameters
+└── prompts.py             # Centralized prompt management
+```
 
-Specific operations:
-- Read defect reports from a folder.
-- Evaluate each report using the scoring table and feedback mechanism.
-- Save the results (filename, score, and feedback) in a CSV file for further analysis.
+### Key Components
 
-### Execution Flow
-1. **Set Defect Cluster Table Path**: Define the path to the defect category statistics file.
-2. **Generate Defect Scoring Table**: Create a scoring table using defect category statistics and scoring rules.
-3. **Evaluate Individual Report**: For each report, extract defects, categorize them, and calculate scores.
-4. **Generate Feedback**: Provide feedback on defect category coverage and improvement suggestions.
-5. **Store Results**: Save the results in a CSV file for further analysis.
+- **main.py**: Main entry point that orchestrates the execution of all three agents.
+- **Agent Classes**: Including textual_agent.py, adequacy_agent.py, competitive_agent.py. Each agent implements specialized assessment logic.
+- **Configuration Management**: Centralized configuration for LLM APIs and assessment parameters.
+- **Prompt Engineering**: Structured prompt templates for consistent LLM interactions.
+
+## Agent Implementations
 
-### Prompts
+### 1. Textual Quality Assessment Agent (`textual_agent.py`)
+
+**Purpose**: Assesses the quality of test case and defect report writing using a comprehensive multi-LLM assessment framework.
 
-| Prompt Name               | Prompt Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **scoring_table_create**   | Please generate a defect scoring table based on the following defect category statistics table and scoring rules.<br>**<defect_category_statistics>**<br>Scoring table generation rules:<br>**<scoring_rules>**<br>Provide the complete calculation process for each step used in the generation of the scoring table, and finally output the result in table form. |
-| **table_extract**          | Please extract only the table generated from Step 4, without any additional unrelated content or explanations.<br>**<generated_scoring_table>** |
-| **score_report**           | Below is a defect scoring table that defines defect categories and their respective scores:<br>**<defect_scoring_table>**<br>Now, here is a list of defect descriptions in the report:<br>**<defect_descriptions>**<br>Follow these steps to process the defects in the report:<br>1. Classify each defect according to the scoring table.<br>2. Find the score for each defect category and output the score. Unclassified defects do not receive any score.<br>3. Sum the scores for all defects and output the total score.<br>4. Provide feedback on the coverage of defect categories and suggest improvements.<br>Output the results in JSON format with `score` and `comment` as the keys. |
-| **competitive_statistics** | For the following list of defects evaluated in the report, please generate a table with 'Report Name', 'Score', and 'Feedback'. The score should be based on the defect category coverage and the feedback should be concise and informative.<br>**<defect_report_coverage_list>** |
-
-### Steps for Creating a Scoring Table
-
-#### Step 1: Define Preliminary Scores
-Based on the defect statistics table, calculate preliminary scores for each defect category. The base score is set at 100 points. The formula for calculating preliminary scores is:
-
-$$\text{Preliminary Score} = \frac{\text{Maximum Base Score}}{\text{Defect Count} + 1}$$
-
-For example, if a defect is reported 5 times and the maximum base score is set at 100 points, then the preliminary score is:
-
-$$\text{Preliminary Score} = \frac{100}{5 + 1} \approx 16.67$$
-
-
-#### Step 2: Calculate Total Score
-Add up the preliminary scores of all defect categories to get the total score. The formula for calculating the total score is:
-
-$$\text{Total Score} = \sum \text{Preliminary Scores of All Defects}$$
-
-#### Step 3: Calculate Normalized Scores
-For each defect category, divide the preliminary score by the total score and then multiply by 100 to get the normalized score. You need to iterate through each defect category to calculate and output the calculation process and result for the normalized score. The formula for calculating normalized scores is:
-
-$$\text{Normalized Score} = \left( \frac{\text{Preliminary Score}}{\text{Total Score}} \right) \times 100$$
-
-For example, if a defect's preliminary score is 16.67 and the total score is 346, then the normalized score is:
-
-$$\text{Normalized Score} = \left( \frac{16.67}{346} \right) \times 100 \approx 4.82$$
-
-#### Step 4: Generate the Scoring Table
-Finally, create a table listing all defect categories and fill in the normalized scores for each category. The table header should have two fields: "Defect Name", "Defect Description", and "Normalized Score". The table should be clear, easy to read, and understandable. The table is created only in Step 4; other steps do not require the output of a table.
-
-| Defect Name | Defect Description | Normalized Score |
-|-------------|--------------------|------------------|
-| ...         | ...                | ...              |
-
-
+**Core Architecture**:
+- **Dual-LLM Assessment**: Uses DeepSeek and Kimi models for parallel assessment to ensure reliability
+- **GPT-4o Arbitration**: Resolves disagreements between the two primary LLMs when conflicts arise
+- **Simplified Checkpoint Format**: Optimizes LLM performance through streamlined assessment prompts
+- **Configurable Assessment Modes**: Supports both single-LLM and dual-LLM assessment modes
+
+**Key Features**:
+- **Three-Dimensional Quality Metrics**: Comprehensive assessment across morphological, relational, and analytical dimensions
+- **Intelligent Sampling**: Optional sampling mechanism for large-scale report assessment
+- **Quantitative Scoring**: Converts qualitative assessments into numerical scores based on checkpoint pass rates
+- **Batch Processing**: Efficiently processes multiple reports with concurrent assessment
+- **Detailed Result Tracking**: Maintains complete assessment history with disagreement analysis
+
+**Quality Dimensions & Indicators**:
+
+| Dimension | Indicator ID | Indicator Name | Score | Description | Applicable to |
+|-----------|--------------|----------------|-------|-------------|---------------|
+| **Morphological** | RM1 | Text Length | 3 | Validates appropriate text length within preset ranges | Both |
+| | RM2 | Readability | 2 | Ensures concise, fluent, and understandable descriptions | Both |
+| | RM3 | Punctuation | 3 | Checks correct punctuation usage and formatting | Both |
+| **Relational** | RR1 | Itemization | 5 | Verifies operational steps are clearly listed with numbered annotations | Both |
+| | RR2 | Environment | 3 | Ensures environmental information is present and detailed | Both |
+| | RR3 | Preconditions | 2 | Confirms preconditions are described and complete | Both |
+| | RR4 | Expected Results | 2 | Validates expected results are filled in standardly | Both |
+| | RR5 | Additional Information | 2 | Checks all required fields are completed | Both |
+| | RR6 | Screenshot | 3 | Verifies screenshots are provided for defect explanation | Defects only |
+| **Analytical** | RA1 | User Interface | 5 | Assesses clarity of interface element descriptions | Both |
+| | RA2 | User Behavior | 5 | Assesses description of user interactions and system responses | Both |
+| | RA3 | Defect Feedback | 3 | Ensures comprehensive defect feedback is included | Defects only |
+
+
+**Assessment Process**:
+1. **Report Preprocessing**: Formats report data into LLM-friendly structured text
+2. **Checklist Generation**: Creates simplified checkpoint IDs mapped to quality indicators
+3. **Dual-LLM Assessment**: Parallel assessment by DeepSeek and Kimi models
+4. **Disagreement Detection**: Identifies conflicts between LLM assessments
+5. **Arbitration Resolution**: Uses GPT-4o to resolve disagreements when enabled
+6. **Score Calculation**: Converts checkpoint results to quantitative scores
+7. **Result Synthesis**: Combines assessments into comprehensive assessment reports
+
+**Outputs**:
+- **Individual Scores**: Per-indicator and per-checkpoint assessment results
+- **Overall Score Percentage**: Normalized score representing overall quality (0-100%)
+- **Disagreement Statistics**: Count and details of LLM assessment conflicts
+- **Processing Metrics**: Assessment time and LLM response characteristics
+
+### 2. Adequacy Assessment Agent (`adequacy_agent.py`)
+
+**Purpose**: Assesses how well test cases cover the specified functional requirements through intelligent requirement tree construction and semantic test case mapping.
+
+**Core Architecture**:
+- **GPT-4o Base LLM**: Uses GPT-4o-2024-05-13 with optimized parameters (temperature=0.1, top_p=0.9) for consistent requirement analysis
+- **Three-Phase Assessment**: Systematic workflow from requirement parsing to coverage calculation
+- **Hierarchical Tree Construction**: Builds structured requirement trees with atomic-level leaf nodes
+- **Semantic Mapping Engine**: Maps test cases to requirement nodes using natural language understanding
+
+**Key Features**:
+- **Intelligent Requirement Parsing**: Handles both structured and unstructured requirement documents
+- **Two-Stage Tree Building**: Initial structure analysis followed by granularity refinement
+- **Atomic Functionality Identification**: Decomposes complex requirements into independently testable units
+- **Robust Parent-Child Relationship Handling**: Maintains hierarchical integrity with automatic relationship validation
+- **Semantic Test Case Mapping**: Uses LLM-powered analysis to match test cases with requirement leaf nodes
+- **Comprehensive Coverage Metrics**: Calculates detailed coverage statistics with gap analysis
+
+**Assessment Process**:
+
+#### **Phase 1: Requirement Analysis & Tree Construction**
+
+**Step 1.1 - Initial Structure Analysis**
+- Analyzes requirement document to identify hierarchical structures
+- Detects numbered sections, functional modules, and semantic groupings
+- Generates preliminary requirement nodes with temporary IDs
+- Establishes initial parent-child relationships based on document structure
+
+**Step 1.2 - Granularity Refinement & Decomposition**
+- Processes each preliminary node for appropriate decomposition
+- Splits complex requirements containing multiple independent functions
+- Ensures atomic-level granularity (single, clear, independently verifiable)
+- Validates leaf node criteria and testability
+
+**Step 1.3 - Tree Construction & Validation**
+- Builds final requirement tree with unique node IDs
+- Establishes hierarchical paths (e.g., "Authentication/Login/Credential_Validation")
+- Validates parent-child relationships and corrects inconsistencies
+- Confirms leaf node status based on children presence
+
+#### **Phase 2: Test Case to Requirement Mapping**
+
+**Semantic Matching Process**:
+- Extracts test case content (ID, name, description, steps)
+- Compares test case semantics against all leaf node descriptions
+- Uses GPT-4o to determine coverage relationships through natural language analysis
+- Returns mapped leaf node paths for each test case
+
+**Mapping Validation**:
+- Handles edge cases where test cases cover multiple requirements
+- Manages cases where test cases don't map to any requirements
+- Provides reasoning for mapping decisions
+
+#### **Phase 3: Coverage Assessment & Reporting**
+
+**Coverage Calculation**:
+- Counts total atomic requirements (leaf nodes)
+- Identifies covered vs. uncovered leaf nodes
+- Calculates coverage percentage with detailed gap analysis
+- Generates comprehensive coverage reports
+
+**Outputs**::
+- **Total Atomic Requirements**: Number of leaf nodes identified
+- **Covered Requirements**: Number of leaf nodes with test case coverage
+- **Coverage Percentage**: (Covered / Total) × 100
+- **Coverage Gaps**: Detailed list of uncovered atomic requirements
+- **Test Case Distribution**: Mapping details showing which test cases cover which requirements
+
+**Requirement Tree Structure**:
+
+Each requirement node contains:
+```json
+{
+  "node_id": "N1.2.3",
+  "description": "User can validate login credentials",
+  "parent_id": "N1.2", 
+  "children_ids": ["N1.2.3.1", "N1.2.3.2"],
+  "is_leaf": false,
+  "path": "Authentication/Login/Credential_Validation"
+}
+```
+
+**Assessment Result Format**:
+```json
+{
+  "total_atomic_requirements (leaf_nodes)": 15,
+  "covered_atomic_requirements": 12,
+  "uncovered_atomic_requirements": 3,
+  "coverage_percentage": "80.00%",
+  "details": {
+    "covered_leaf_nodes": [...],
+    "uncovered_leaf_nodes (gaps)": [...]
+  }
+}
+```
+
+**Supported Document Types**:
+- **Structured Requirements**: Documents with clear hierarchical numbering and sections
+- **Unstructured Requirements**: Natural language requirement descriptions
+- **Mixed Format Documents**: Combination of structured and unstructured content
+
+### 3. Competitive Assessment Agent (`competitive_agent.py`)
+
+**Purpose**: Assesses tester performance through intelligent defect clustering and uniqueness scoring to evaluate the competitive value of individual tester contributions.
+
+**Core Architecture**:
+- **GPT-4o Clustering Engine**: Uses GPT-4o-2024-05-13 with optimized parameters (temperature=0.1, top_p=0.9) for consistent defect categorization
+- **Hierarchical Tree Structure**: Builds multi-level defect clustering trees based on root causes and observable symptoms
+- **Uniqueness Scoring Algorithm**: Implements inverse frequency scoring where rarer defects receive higher scores
+- **Competitive Ranking System**: Ranks testers based on their ability to discover unique and valuable defects
+
+**Key Features**:
+- **Deep Hierarchical Clustering**: Creates 3-4 level deep clustering trees for fine-grained defect categorization
+- **Root Cause Analysis**: Groups defects by underlying causes rather than surface symptoms
+- **Automatic Uniqueness Scoring**: Assigns scores inversely proportional to defect frequency within clusters
+- **Multi-tester Comparison**: Evaluates relative performance across all participating testers
+- **Comprehensive Result Tracking**: Maintains detailed records of defect contributions and scoring rationale
+
+**Assessment Process**:
+
+#### **Phase 1: Defect Data Collection & Preprocessing**
+
+**Data Loading**:
+- Reads defect reports from Excel files organized by tester
+- Extracts key defect attributes: ID, description, reproduction steps, actual results
+- Validates data completeness and filters out invalid entries
+- Consolidates all defects across testers into unified dataset
+
+**Data Structure**:
+```python
+defect = {
+    "defect_id": "file1_0",
+    "title": "Login button becomes unresponsive after multiple clicks",
+    "steps": "1. Navigate to login page 2. Click login button repeatedly",
+    "actual_result": "Button becomes unresponsive, no error message"
+}
+```
+
+#### **Phase 2: Intelligent Defect Clustering**
+
+**LLM-Powered Clustering**:
+- Submits all defect descriptions to GPT-4o for hierarchical analysis
+- Uses specialized prompts to identify root causes and symptom patterns
+- Generates structured clustering tree with multiple levels of granularity
+- Ensures fine-grained categorization to distinguish subtle defect differences
+
+**Clustering Criteria**:
+- **Root Causes**: Underlying technical issues (authentication failure, UI rendering, data validation)
+- **Symptom Patterns**: Observable behaviors (crashes, unresponsive elements, data corruption)
+- **Operational Context**: User interaction sequences that trigger defects
+- **Environmental Factors**: Platform-specific or configuration-dependent issues
+
+**Tree Structure Example**:
+```
+LEVEL 1: Authentication Module Defects
+  LEVEL 2: Login Process Failures
+    LEVEL 3: Credential Validation Issues
+      REPORTS: defect_001, defect_015
+    LEVEL 3: Session Management Problems
+      REPORTS: defect_007
+  LEVEL 2: Password Recovery Issues
+    LEVEL 3: Email Verification Failures
+      REPORTS: defect_012, defect_023
+```
+
+#### **Phase 3: Uniqueness Scoring & Competitive Assessment**
+
+**Uniqueness Score Calculation**:
+- Identifies "scorable nodes" (leaf nodes and nodes with direct defect assignments)
+- Calculates uniqueness score: `Score = MaxScore / Number of Defects in Node`
+- Applies inverse frequency principle: rarer defects receive higher scores
+- Default MaxScore = 10.0 (configurable)
+
+**Competitive Score Aggregation**:
+- Sums uniqueness scores for all defects contributed by each tester
+- Ensures each unique defect category is only counted once per tester
+- Handles cases where multiple testers discover the same defect type
+- Provides detailed breakdown of score contributions
+
+**Scoring Algorithm**:
+```python
+# For each unique defect node
+node_score = max_score / defects_count_in_node
+
+# For each tester
+tester_score = sum(node_scores for unique_nodes_contributed)
+```
+
+#### **Phase 4: Performance Ranking & Analysis**
+
+**Tester Performance Metrics**:
+- **Total Competitive Score**: Sum of uniqueness scores across all contributed defect types
+- **Unique Defect Categories**: Number of distinct defect types discovered
+- **Discovery Efficiency**: Ratio of unique discoveries to total defects reported
+- **Rarity Index**: Average uniqueness score per defect contribution
+
+**Result Analysis**:
+- Ranks testers by competitive score (descending order)
+- Identifies top performers in defect discovery
+- Analyzes contribution patterns and discovery specializations
+- Provides insights into tester strengths and coverage gaps
+
+**Tree Node Structure**:
+
+Each node in the clustering tree contains:
+```python
+{
+    "node_id": "N15",
+    "name": "Email Verification Failures", 
+    "level": 3,
+    "reports": ["defect_012", "defect_023"],
+    "children": [],
+    "parent": "N8"
+}
+```
+
+**Assessment Result Format**:
+```json
+{
+    "tester_id": "3",
+    "report_id": "TR_tester_3",
+    "competitive_score": 8.33,
+    "contributed_unique_bugs_details": {
+        "N15": {
+            "score_contribution": 5.0,
+            "unique_bug_name": "Email Verification Failures",
+            "unique_bug_path": "Authentication -> Password Recovery -> Email Verification",
+            "original_defect_ids_contributed_by_tester": ["defect_012"],
+            "total_original_reports_in_this_unique_bug_node": 2
+        }
+    }
+}
+```
+
+
+**Data Input Requirements**:
+- **Excel File Structure**: One file per tester containing defect reports
+- **Required Columns**: 缺陷描述 (Defect Description), 操作步骤 (Steps), 实际结果 (Actual Result)
+- **File Naming**: Sequential numbering (1.xlsx, 2.xlsx, etc.)
+- **Data Validation**: Automatic filtering of incomplete or invalid entries
+
+**Outputs**::
+- **Individual Tester Scores**: Competitive assessment scores with detailed breakdowns
+- **Defect Clustering Tree**: Hierarchical structure showing all defect categorizations
+- **Contribution Analysis**: Detailed mapping of which testers discovered which defect types
+- **Performance Rankings**: Comparative analysis across all participating testers
+- **Uniqueness Insights**: Analysis of rare vs. common defect discoveries
+
+## Prompt Templates
+
+### Textual Assessment Agent Prompts
+
+#### System Prompt - Assessor (SYSTEM_PROMPT_ASSESSOR)
+
+**Prompt Text:**
+```text
+You are a highly professional, rigorous, and impartial AI for test report quality assessment. Your responsibility is to strictly assess test reports or defect reports according to the provided assessment checklist, making item-by-item judgments and outputting results in precise JSON format, including boolean judgments and brief reasoning for each checkpoint.
+```
+
+#### System Prompt - Arbitrator (SYSTEM_PROMPT_ARBITRATOR)
+
+**Prompt Text:**
+```text
+You are a highly professional test report quality assessment arbitrator expert. Your task is to analyze disagreements between two LLM assessment results and make final fair judgments based on objective standards.
+```
+
+#### Standard Assessment Prompt Template (TEXTUAL_ASSESSMENT_PROMPT_TEMPLATE)
+
+**Template Structure:**
+```text
+You are a professional test report quality assessment robot. Your task is to strictly follow the provided assessment checklist based on the detailed content of a test report or defect report, judging each checkpoint one by one to determine whether it meets the requirements.
+
+**Please respond in JSON format only.** The JSON structure should be similar to the checklist structure you receive, but each checkpoint needs to include an additional boolean 'value' field (True or False) and a string 'reasoning' field explaining your True/False judgment.
+
+If a checkpoint does not apply to the current report type (e.g., defect-specific checkpoints for test cases), set its 'value' to False and explain in 'reasoning' as "Not applicable to test case reports."
+
+---
+**Report Details for Assessment:**
+{report_details}
+---
+**Assessment Checklist (please judge each item and provide reasoning):**
+{evaluation_checklist}
+
+Please strictly return your assessment results in the following JSON format:
+{
+  "Morphological": [
+    {
+      "id": "RM1",
+      "checkpoints": [
+        { "description": "...", "value": true/false, "reasoning": "..." },
+        { "description": "...", "value": true/false, "reasoning": "..." }
+      ]
+    }
+  ],
+  "Relational": [...],
+  "Analytical": [...]
+}
+```
+
+#### Simplified Assessment Prompt Template (TEXTUAL_ASSESSMENT_PROMPT_SIMPLIFIED_TEMPLATE)
+
+**Template Structure:**
+```text
+You are a professional test report quality assessment robot. Your task is to strictly follow the provided assessment checklist based on the detailed content of a test report or defect report, judging each checkpoint one by one to determine whether it meets the requirements.
+
+**Please respond in JSON format only.**
+
+For each checkpoint, please return:
+- checkpoint_id: Checkpoint ID (e.g., RM1-1)
+- value: true or false
+- reasoning: Brief justification (maximum 5 words)
+
+---
+**Report Details for Assessment:**
+{report_details}
+---
+**Assessment Checklist:**
+{simplified_checklist}
+
+Please strictly return your assessment results in the following JSON format:
+{
+  "checkpoint_results": [
+    {"checkpoint_id": "RM1-1", "value": true, "reasoning": "Appropriate length"},
+    {"checkpoint_id": "RM1-2", "value": false, "reasoning": "Too long"}
+  ]
+}
+```
+
+#### Disagreement Resolution Prompt Template (TEXTUAL_DISAGREEMENT_RESOLUTION_PROMPT_TEMPLATE)
+
+**Template Structure:**
+```text
+You are a professional test report quality assessment arbitrator. Two independent LLMs assessed the same test report but produced disagreements on certain checkpoints. You need to analyze these disagreements and make final fair judgments.
+
+**Report Details:**
+{report_details}
+
+**Disagreement Details:**
+{disagreement_summary}
+
+**Please conduct thinking and judgment process:**
+1. Analyze the context and assessment criteria for each disagreement point
+2. Review the reasoning provided by both LLMs
+3. Make final judgments based on report content and quality standards
+
+Please return your final judgment results in JSON format as follows:
+{
+  "resolved_disagreements": [
+    {
+      "category": "...",
+      "indicator_id": "...",
+      "checkpoint_index": 0,
+      "final_value": true/false,
+      "resolution_reasoning": "Based on...analysis, I believe..."
+    }
+  ]
+}
+```
+
+#### Simplified Disagreement Resolution Prompt Template (TEXTUAL_DISAGREEMENT_RESOLUTION_SIMPLIFIED_TEMPLATE)
+
+**Template Structure:**
+```text
+You are a professional test report quality assessment arbitrator. Two independent LLMs assessed the same test report but produced disagreements on certain checkpoints. You need to analyze these disagreements and make final fair judgments.
+
+**Report Details:**
+{report_details}
+
+**Disagreement Details:**
+{disagreement_summary}
+
+**Please conduct thinking and judgment process:**
+1. Analyze the context and assessment criteria for each disagreement point
+2. Review the reasoning provided by both LLMs
+3. Make final judgments based on report content and quality standards
+
+Please return your final judgment results in JSON format as follows:
+{
+  "resolved_disagreements": [
+    {
+      "checkpoint_id": "RM1-1",
+      "final_value": true,
+      "resolution_reasoning": "Based on...analysis, I believe..."
+    }
+  ]
+}
+```
+
+### Adequacy Assessment Agent Prompts
+
+#### System Prompt - Requirement Structure Analysis (SYSTEM_PROMPT_REQUIREMENT_STRUCTURE)
+
+**Prompt Text:**
+```text
+You are a top-tier requirements analysis expert. Your task is to analyze the given software requirements document and transform it into a structured requirement tree. Each node in the requirement tree should include: 'node_id' (unique identifier), 'description' (requirement description), 'parent_id' (parent node ID, null for root node), 'children_ids' (list of child node IDs), 'is_leaf' (boolean indicating if it's an atomic functionality/leaf node), and 'path' (path from root to current node, separated by '/').
+
+Please first analyze the entire document to identify main hierarchical structures or high-level functional modules. If the document has clear title numbering, please utilize them. If the document structure is not obvious, please perform logical grouping based on semantic relevance. Output a preliminary, hierarchical requirement list where each item is a potential requirement node.
+
+For each identified requirement node, please judge whether it might contain multiple finer-grained, independently testable atomic functions.
+
+For example, if the document has "1. User Management" and "1.1 User Login", then "1. User Management" is the parent node of "1.1 User Login".
+If a requirement point is "Users can login and register", you need to mark it as potentially needing further decomposition.
+
+The output format should be a JSON object containing a list named 'potential_nodes'. Each list item is an object containing 'temp_id' (unique temporary ID), 'description', 'potential_parent_description' (if parent level description can be identified), 'level' (hierarchical depth, starting from 0), and 'needs_further_decomposition' (boolean).
+Please ensure temp_id is unique.
+```
+
+#### System Prompt - Requirement Decomposition (SYSTEM_PROMPT_REQUIREMENT_DECOMPOSE)
+
+**Prompt Text:**
+```text
+You are a top-tier requirements analysis expert, specializing in decomposing requirements into atomic-level, testable functional points. Based on the preliminary analysis results (potential_nodes) of the requirements document, you now need to perform in-depth decomposition and granularity confirmation for each 'potential_node'. Particularly when 'needs_further_decomposition' is true, or when the node description itself is relatively complex.
+
+For each node to be processed:
+1. If it describes multiple independent functions (e.g., connected by 'and', 'or', 'as well as', or contains multiple verbs for different operations), please split it into multiple independent atomic functional points. Each atomic functional point should be single, clear, and independently verifiable.
+   For example: "Users can login and register" should be split into "Users can login to the system" and "Users can register accounts".
+   "Asset management includes adding, editing, deleting assets" should be split into "Users can add assets", "Users can edit assets", "Users can delete assets".
+2. If the node description is already atomic-level, no splitting is needed.
+3. Ensure appropriate granularity of atomic functional points: neither too broad (like "manage data") nor too trivial (like "button color is red", unless it's a core UI test point). A good atomic functional point usually corresponds to a small group of closely related test cases.
+
+You will receive a JSON object containing a 'nodes_to_process' list, where each object has 'original_description' and 'original_temp_id'.
+You need to output a JSON object containing a dictionary named 'refined_node_map'.
+The keys of this dictionary are 'original_temp_id'.
+The value for each key is a list containing one or more 'refined_node_item' objects. If the original node is split, the list contains multiple objects; otherwise, the list contains only one object.
+Each 'refined_node_item' object should contain:
+- 'description': Description of the atomic functional point after splitting or confirmation.
+- 'is_atomic_leaf': true (because we expect this step to produce leaf nodes, or confirm whether intermediate nodes can serve as leaves).
+- 'decomposition_notes': (optional) Brief explanation of splitting logic or why no splitting was performed.
+```
+
+#### System Prompt - Test Case Mapping (SYSTEM_PROMPT_TEST_CASE_MAPPING)
+
+**Prompt Text:**
+```text
+You are a professional software testing and requirements analysis expert. Your task is to map given test cases to atomic functional points (leaf nodes) in the requirement tree. You will receive test case-related information (ID, name, description) and a list of requirement tree leaf nodes (including their unique paths and descriptions). For each test case, please determine which leaf node(s) from the list it primarily covers.
+
+Output a JSON object in the following format:
+{
+    "test_case_id": "Original test case ID",
+    "covered_leaf_node_paths": ["path_to_leaf_node_1", "path_to_leaf_node_2"], 
+    "reasoning": "Brief explanation of mapping rationale or confidence."
+}
+
+If the test case does not clearly cover any of the provided leaf nodes, "covered_leaf_node_paths" should be an empty list.
+Please ensure to select only the most directly relevant leaf nodes.
+```
+
+#### User Prompt Templates
+
+**Requirement Structure Analysis User Prompt (get_requirement_structure_user_prompt):**
+
+Template generates:
+```text
+Please analyze the following requirements document and output a preliminary hierarchical requirements list according to the above instructions:
+
+Requirements Document:
+{requirements_document_text}
+```
+
+**Requirement Decomposition User Prompt (get_requirement_decompose_user_prompt):**
+
+Template generates:
+```text
+Please process the following requirement node list according to the system instructions, performing atomic functional point decomposition and granularity confirmation. Output 'refined_node_map'.
+
+Input Data:
+{
+    "nodes_to_process": [processed_node_data]
+}
+```
+
+**Test Case Mapping User Prompt (get_test_case_mapping_user_prompt):**
+
+Template generates:
+```text
+Requirement tree leaf node list is as follows:
+[leaf_nodes_data_in_json_format]
+
+Please analyze the following test case and map it to the above leaf nodes:
+Test Case Content:
+{test_case_content_for_llm}
+
+Please strictly output your judgment results in the JSON format specified by the system instructions.
+The "test_case_id" field should be "{tc_id}".
+```
+
+### Competitive Assessment Agent Prompts
+
+#### System Prompt - Defect Clustering (SYSTEM_PROMPT_DEFECT_CLUSTERING)
+
+**Prompt Text:**
+```text
+You are a senior software testing quality assurance expert, skilled at organizing defect reports into hierarchical structures with depth and fine granularity. Your task is to analyze a group of defect reports to identify unique defect issues and their variants within them, organizing them into a hierarchical clustering tree. You should cluster them based on the **root causes and observable symptoms** reflected in the defect descriptions.
+```
+
+#### Defect Clustering Prompt Template (DEFECT_CLUSTERING_PROMPT_TEMPLATE)
+
+**Template Structure:**
+```text
+You are a senior software testing quality assurance expert responsible for analyzing a group of defect reports to identify unique defect issues and their variants, organizing them into a hierarchical clustering tree. Your task is to cluster them based on the **root causes and observable symptoms** reflected in these defect descriptions.
+
+Defect Report List:
+{defect_descriptions_str}
+
+Output Format Instructions:
+Please output your clustering results in a **hierarchical tree structure**. Use indentation to represent hierarchical relationships. Each line starts with "LEVEL <number>: <cluster name>" where <number> represents the hierarchical depth (starting from 1), and <cluster name> is your description of this defect category.
+
+After a LEVEL line, if it directly contains some defect report IDs (these reports belong to the category described by the current LEVEL and are not further subdivided by sub-LEVELs), use "  REPORTS: <ID1>, <ID2>, ..." to list these IDs. The REPORTS line needs two more spaces of indentation than its parent LEVEL line.
+A LEVEL node can have multiple sub-LEVEL nodes, or directly have REPORTS. Leaf nodes (most specific defect categories) usually contain REPORTS.
+
+**Key Requirements:**
+1. **Fine granularity & Depth**: Must pursue "fine-grained" clustering, truly distinguishing different defects. Strive to build a hierarchical structure of at least 3 to 4 levels deep (when reasonable), decomposing problems into the most specific, distinguishable forms.
+2. **Sub-classification Logic**: Carefully consider the basis for sub-classification. Can be based on but not limited to: specific error messages, differences in user operation sequences causing defects, affected sub-modules or functional points, different preconditions, or subtle variations in observed symptoms. Each unique variant should ideally become a separate leaf node or small cluster.
+3. **Avoid Over-generalization**: If a category obviously contains multiple sub-problems of different natures, please ensure they are represented as sub-LEVELs. Do not aggregate too many essentially different root causes under the same LEVEL 2 or LEVEL 3 node if they can be further subdivided.
+4. **Completeness**: Ensure every defect ID provided in the input is assigned to some node's REPORTS list in the tree, and only assigned once.
+5. **Clarity**: The entire tree structure should clearly reflect commonalities and differences between defects.
+
+Example Output Format (showing expected depth and structure):
+LEVEL 1: Login Module Defects
+  LEVEL 2: Authentication Failures
+    LEVEL 3: Invalid Username or Password
+      REPORTS: D001, D002
+    LEVEL 3: Account Locked
+      REPORTS: D005
+    LEVEL 3: API Service Timeout
+      REPORTS: D008
+  LEVEL 2: Login Interface UI Issues
+    LEVEL 3: Button Misalignment
+      REPORTS: D010
+    LEVEL 3: Input Field Style Errors
+      REPORTS: D011
+LEVEL 1: Profile Module Issues
+  REPORTS: D003 // Example of direct attribution to "Profile Module Issues" without further subdivision
+  LEVEL 2: Avatar Upload Issues
+    LEVEL 3: Large File Upload Failures
+      REPORTS: D004, D006
+    LEVEL 3: Unsupported File Types
+      LEVEL 4: Non-image Format Upload with Unclear Error Messages
+        REPORTS: D007
+      LEVEL 4: Specific Image Type Processing Failures (e.g., .heic)
+        REPORTS: D009
+    LEVEL 3: Image Cropping Function Anomalies
+      REPORTS: D012
+
+Please think step by step to ensure your classification is correct and the hierarchical structure is reasonable and sufficiently detailed.
+```
 
 ## Model Selection
 
-### 1. Model Selection
-After testing various models and considering factors such as cost, scoring accuracy, and token length requirements for diverse scenarios, we have chosen **GPT-3.5-turbo** and **Kimi's moonshot-v1-8k** as the cornerstone models for our approach. **GPT-3.5-turbo** is renowned for its high scoring accuracy and adeptness at handling longer texts, while **Kimi's model** stands out in qualitative assessments, particularly for tasks that demand an extended understanding of context.
+### Rationale for Multi-Model Architecture
 
-### 2. Sampling Parameters
-To maintain consistency and fairness in the model's scoring while preserving a degree of subjectivity, we have set the temperature parameter to **0.1**. This low value ensures that the model's outputs are more consistent, thereby reducing bias, and yet it still allows for a certain level of diversity in the outcomes.
+Our framework employs a strategic multi-model approach, leveraging three different LLMs based on their unique strengths, cost-effectiveness, and task requirements. The selection criteria prioritize **cost efficiency**, **performance quality**, and **functional capabilities** to achieve optimal assessment accuracy while maintaining economic feasibility for large-scale assessment.
 
-### Model Comparison
+### Selected Models and Justification
 
-| Feature               | GPT-3.5-turbo                           | Kimi's moonshot-v1-8k                       |
-|-----------------------|------------------------------------------|--------------------------------------------|
-| **Core Focus**         | High scoring accuracy and handling long texts | Qualitative assessments with extended context understanding |
-| **Strengths**          | Excellent for large-scale tasks, adaptable for a variety of scenarios | Specializes in tasks requiring deep context understanding |
-| **Performance**        | Efficient with large volumes of data and texts | Strong in qualitative evaluations, especially for nuanced analysis |
-| **Temperature Setting**| 0.1 for consistency with slight diversity | 0.1 for reduced bias, allowing for varied yet consistent outputs |
-| **Best Use Cases**     | Scoring, content generation, and tasks requiring long-form text handling | Assessments requiring deeper contextual comprehension and nuanced evaluation |
-| **Customization**      | Highly flexible, capable of handling different contexts with minimal loss in performance | Tailored for complex, subjective, and context-heavy evaluations |
-| **Cost Efficiency**    | Well-suited for larger volumes, optimized for various cost-effective applications | Potentially more resource-intensive and slower in processing, it excels in specialized areas |
+| Model | Pricing (Input/Output) | Context Length | Advanced Features | Primary Role | Selection Rationale |
+|-------|----------------------|----------------|------------------|--------------|-------------------|
+| **Kimi** <br/>(moonshot-v1-8k-latest) | ¥2.00/1M <br/> ¥10.00/1M | 8,192 tokens | Standard LLM capabilities | Textual quality assessment (dual-LLM setup) | **Cost-Effective**: Significantly lower cost for large-scale processing<br/>**Adequate Context**: 8K sufficient for individual reports<br/>**Consistent Performance**: Reliable for structured assessment tasks<br/>**Scalability**: Economical for batch processing hundreds of reports |
+| **DeepSeek-v3** <br/>(deepseek-chat) | ¥2.00/1M <br/> ¥8.00/1M<br/>*(50% off-peak discount)* | 64K tokens | • JSON Output<br/>• Function Calling<br/>• Conversation Prefix<br/>• FIM Completion | • Textual quality assessment (dual-LLM)<br/>• Requirement analysis<br/>• Defect clustering | **Superior Cost-Performance**: Lower output pricing with enhanced capabilities<br/>**Extended Context**: 64K enables complex document processing<br/>**Structured Output**: Native JSON support for consistent responses<br/>**Off-Peak Optimization**: 50% discount for cost-optimized batch processing |
+| **GPT-4o** | $5.00/1M <br/> $20.00/1M<br/>*($2.50/1M cached)* | 128K tokens | • Advanced reasoning<br/>• Multimodal support<br/>• Premium quality | • Disagreement resolution<br/>• Final quality arbitration | **Premium Quality**: Highest reasoning capability for complex arbitration<br/>**Objective Arbitration**: Superior analytical skills for conflict resolution<br/>**Strategic Usage**: Reserved for critical decision points<br/>**Context Advantage**: Large context for comprehensive conflict analysis |
+
+### Task-Model Allocation Strategy
+
+| Assessment Task | Subtask | Primary Model | Secondary Model | Arbitrator | Rationale |
+|-----------------|---------|---------------|-----------------|------------|-----------|
+| **Textual Quality Assessment** | Quality checklist assessment | DeepSeek-v3 | Kimi-8k | GPT-4o | Dual assessment for reliability, cost-effective primary models |
+| **Textual Quality Assessment** | Disagreement Resolution | GPT-4o | - | - | Dual assessment for reliability, cost-effective primary models |
+| **Adequacy Assessment** | Requirement tree construction | GPT-4o | - | - |  Highest reasoning capability for critical arbitration decisions |
+| **Adequacy Assessment** | Test case mapping | DeepSeek-v3 | - | - | Cost-effective for routine mapping tasks with acceptable accuracy |
+| **Competitive Assessment** | Defect clustering | GPT-4o | - | - | Premium quality essential for accurate defect categorization |
 
 
-## Reproduction Steps
+### Cost-Benefit Analysis
 
-### Step 1: Download the Project  
-Click the **Download Repository** button in the top-right corner of the page to download the project.
+**Economic Efficiency**:
+- **Cost-Effective Primary Tasks**: DeepSeek-v3 and Kimi provide 60-75% cost savings for routine textual assessment and test case mapping
+- **Strategic Premium Usage**: GPT-4o reserved for high-precision tasks (requirement decomposition, defect clustering) and arbitration (~15-25% of total operations)
+- **Batch Optimization**: DeepSeek's off-peak pricing enables 50% additional savings for large-scale evaluations
+- **Precision-Cost Balance**: Strategic model allocation optimizes accuracy where needed while minimizing overall costs
 
-### Step 2: Extract the Project  
-Unzip the downloaded file **MDACTR.zip**.
+**Quality Assurance**:
+- **Dual-LLM Validation**: Independent assessment by DeepSeek-v3 and Kimi reduces individual model bias in textual evaluation
+- **Premium Precision Tasks**: GPT-4o ensures high accuracy for complex requirement decomposition and defect clustering
+- **Premium Arbitration**: GPT-4o provides reliable resolution of assessment disagreements
+- **Task-Specific Optimization**: Model selection based on precision requirements ensures optimal quality-cost balance
 
-### Step 3: Install Dependencies  
-Use `pip install` to install the following dependencies:
+**Scalability Benefits**:
+- **High Throughput**: Cost-effective primary models enable assessment of large report volumes
+- **Resource Optimization**: Model selection based on task complexity optimizes computational resources
+- **Flexible Architecture**: Multi-model approach allows adaptation to different evaluation scales and budgets
 
-```text
-annotated-types==0.7.0
-anyio==4.7.0
-certifi==2024.8.30
-distro==1.9.0
-et-xmlfile==1.1.0
-exceptiongroup==1.2.2
-h11==0.14.0
-httpcore==1.0.7
-httpx==0.28.0
-idna==3.10
-jiter==0.8.0
-numpy==2.1.2
-openai==1.57.0
-openpyxl==3.1.5
-pandas==2.2.3
-pydantic==2.10.3
-pydantic_core==2.27.1
-python-dateutil==2.9.0.post0
-pytz==2024.2
-six==1.16.0
-sniffio==1.3.1
-tqdm==4.67.1
-typing_extensions==4.12.2
-tzdata==2024.2
-```
-### Step 4: Configure API Key  
-Open the **kimi_llm.py** file and replace the `api_key` and `base_url` with your own OpenAI API credentials. Save the changes.
 
-### Step 5: Move the File  
-Move the **kimi_llm.py** file to the **agent** folder.
+This strategic model selection ensures **optimal balance between assessment quality, economic feasibility, and scalability** for crowdsourced testing report evaluation. By utilizing GPT-4o for precision-critical tasks (requirement decomposition and defect clustering) while leveraging cost-effective models for routine assessments, the framework achieves both high accuracy and economic efficiency.
 
-### Step 6: Run Adequacy Assessment  
-Navigate to the **agent** folder in the terminal and execute the adequacy dimension evaluation using the following command:  
+## Installation & Setup
+
+### Download the Project
+
+Click the **Download Repository** button or **Code → Download ZIP** button in the top-right corner of the repository page to download the project.
+
+### Extract the Project
+
+If you downloaded the ZIP file, unzip the downloaded file `MDACTR.zip` to your desired location:
+
 ```bash
-python main.py adequacy
+# On Windows
+unzip MDACTR.zip
+
+# On macOS/Linux
+unzip MDACTR.zip
+# or
+tar -xf MDACTR.zip
 ```
-### Step 7: Run Competitive Assessment
-Run the competitiveness dimension evaluation using the following command:
+
+Navigate to the extracted project directory:
+
 ```bash
-python main.py competitive
+cd MDACTR
 ```
-### Step 8: Run Textual Assessment
-Run the textual evaluation using the following command:
+
+### Prerequisites
+
+- Python 3.8+
+- Required Python packages (see requirements below)
+- API keys for LLM services
+
+### Dependencies
+
+Install required packages:
+
 ```bash
-python main.py textual
+pip install pandas openpyxl openai python-dotenv
 ```
-### Step 9: View Assessment Results  
-Find the following files in the **agent** folder to view the evaluation results:  
-- **report_adequacy_scores.csv**: Contains the results of the adequacy assessment.  
-- **report_competitive_scores.csv**: Contains the results of the competitiveness assessment.  
-- **report_textual_scores.csv** : Contains the results of the textual assessment. 
-                                                                                                                                                                                                                                                                                                                                                                           
+
+### API Configuration
+
+1. Copy `config.py` and configure your API keys:
+
+```python
+# DeepSeek API Configuration
+DEEPSEEK_API_KEY = "your_deepseek_api_key"
+DEEPSEEK_BASE_URL = "https://api.deepseek.com/v1"
+
+# Kimi API Configuration  
+KIMI_API_KEY = "your_kimi_api_key"
+KIMI_BASE_URL = "https://api.moonshot.cn/v1"
+
+# OpenAI API Configuration (for GPT-4o arbitration)
+OPENAI_API_KEY = "your_openai_api_key"
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+```
+
+### Assessment Content Structure
+
+The framework assesses two types of crowdsourced testing reports with structured content:
+
+#### Test Case Reports
+
+Test case reports contain the following key fields:
+
+| Field | Description | Assessment Relevance |
+|-------|-------------|---------------------|
+| **Case ID** | Unique identifier for the test case | Traceability and organization |
+| **Case Name** | Descriptive title of the test case | Clarity and understandability |
+| **Priority** | Priority level (High/Medium/Low) | Test planning and coverage |
+| **Description** | Detailed description of test objective | Completeness and clarity |
+| **Preconditions** | Required conditions before test execution | Reproducibility |
+| **Environment** | Testing environment specifications | Reproducibility and completeness |
+| **Test Steps** | Step-by-step execution procedures | Itemization and logical structure |
+| **Input Data** | Required input parameters | Completeness |
+| **Expected Result** | Expected system behavior | Completeness and clarity |
+| **Judgment Criteria** | Success/failure criteria | Precision and objectivity |
+| **Additional Notes** | Supplementary information | Completeness |
+| **Attachments** | Screenshots, videos, or other files | Visual documentation |
+
+#### Defect Reports
+
+Defect reports include additional fields specific to issue documentation:
+
+| Field | Description | Assessment Relevance |
+|-------|-------------|---------------------|
+| **Defect ID** | Unique identifier for the defect | Traceability |
+| **Related Case ID** | Reference to associated test case | Traceability |
+| **Defect Description** | Detailed issue description | Clarity and completeness |
+| **Defect Type** | Classification of defect category | Organization and analysis |
+| **Preconditions** | Conditions that trigger the defect | Reproducibility |
+| **UI Title** | Interface element where defect occurs | Interface element description |
+| **Reproduction Steps** | Steps to reproduce the defect | Reproducibility and itemization |
+| **Environment Info** | Environment where defect was found | Reproducibility |
+| **Input Data** | Data that triggers the defect | Reproducibility |
+| **Expected Result** | What should have happened | Clarity |
+| **Actual Result** | What actually happened | Defect feedback and clarity |
+| **Screenshots** | Visual evidence of the defect | Visual documentation |
+| **Video Recording** | Recorded reproduction of the defect | Visual documentation |
+| **Submitter** | Tester who reported the defect | Accountability |
+| **Report Time** | When the defect was reported | Temporal tracking |
+
+These structured reports enable systematic quality assessment across the three dimensions:
+- **Textual Quality**: Assesses writing quality, completeness, and clarity of individual fields
+- **Adequacy**: Maps test cases to functional requirements for coverage analysis  
+- **Competitive**: Analyzes defect uniqueness and discovery value through clustering
+
+### Data Structure
+
+Organize your data as follows:
+```
+data/
+├── test_requirements.txt          # Requirements document
+└── app1/                         # Application data
+    ├── testcases/               # Test case Excel files
+    │   ├── 1.xlsx              # Tester 1's test cases
+    │   ├── 2.xlsx              # Tester 2's test cases
+    │   └── ...
+    ├── defects/                 # Defect Excel files
+    │   ├── 1.xlsx              # Tester 1's defects
+    │   ├── 2.xlsx              # Tester 2's defects
+    │   └── ...
+    ├── results/                 # Assessment results
+    └── temp/                    # Temporary files
+```
+
+## Usage
+
+### Basic Usage
+
+Run the complete assessment pipeline:
+
+```bash
+python main.py app1
+```
+
+### Individual Agent Testing
+
+Test individual agents:
+
+```bash
+# Test adequacy assessment
+python adequacy_agent.py
+
+# Test competitive assessment
+python competitive_agent.py
+```
+
+### Configuration Options
+
+Key configuration parameters in `config.py`:
+
+```python
+# Assessment Mode Configuration
+ENABLE_DUAL_LLM_ASSESSMENT = True      # Enable dual-LLM assessment
+ENABLE_ARBITRATION = True               # Enable arbitration when disagreements occur
+DEFAULT_SINGLE_LLM = "deepseek"        # Default LLM for single-LLM mode
+
+# Textual Assessment Configuration
+ENABLE_TEXTUAL_SAMPLING = True         # Enable sampling for textual assessment
+TEXTUAL_SAMPLE_TESTCASE_SIZE = 5       # Sample size for test cases
+TEXTUAL_SAMPLE_DEFECT_SIZE = 5         # Sample size for defects
+```
+
+## Output Format
+
+### Results Structure
+
+The framework generates the following output files:
+
+1. **Adequacy Assessment Results** (`adequacy_assessment_result.json`)
+   - Coverage analysis per tester
+   - Requirement tree structure
+   - Mapping statistics
+
+2. **Textual Assessment Results** (`textual_assessment_result.json`)
+   - Quality scores per tester
+   - Detailed assessment results
+   - Sampling statistics
+
+3. **Competitive Assessment Results** (`competitive_assessment_result.json`)
+   - Competitive scores per tester
+   - Defect clustering hierarchy
+   - Uniqueness analysis
+
+4. **Comprehensive Summary** (`comprehensive_summary.json`)
+   - Overall statistics
+   - Cross-dimensional analysis
+   - Performance rankings
+
+### Sample Output Structure
+
+```json
+{
+  "assessment_timestamp": "2025-05-20 10:30:00",
+  "adequacy_assessment": {
+    "status": "success",
+    "total_testers": 18,
+    "average_coverage": 75.5,
+    "coverage_stats": {
+      "max_coverage": 95.2,
+      "min_coverage": 45.8
+    }
+  },
+  "textual_assessment": {
+    "status": "success",
+    "total_testers": 18,
+    "avg_testcase_score": 82.3,
+    "avg_defect_score": 78.9,
+    "sampling_enabled": true
+  },
+  "competitive_assessment": {
+    "status": "success",
+    "total_testers": 18,
+    "average_competitive_score": 68.7
+  }
+}
+```
