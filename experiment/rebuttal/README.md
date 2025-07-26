@@ -55,9 +55,8 @@ Addresses the concern about lack of traditional machine learning baseline compar
    - Features: 1009-dimensional (1000 TF-IDF + 9 structural features)
 
 3. **LLM-as-a-Judge** - Our proposed method
-   - Model: GPT-4 with structured prompts
+   - Model: kimi-latest-32k, deepseek-v3-0324, GPT-4o-2024-05-13 with structured prompts
    - Temperature: 0.1 for consistency
-   - Max_tokens: 4096
 
 ### Usage
 ```bash

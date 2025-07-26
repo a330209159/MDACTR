@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Rebuttal Experiment for Reviewer B
-Four Baseline Methods Comparison: SVM, Random Forest, Heuristic, LLM
+Four Baseline Methods Comparison: SVM, Random Forest, LLM-as-a-Judge
 Generates comprehensive baseline evaluation results table
 """
 
